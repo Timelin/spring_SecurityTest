@@ -1,9 +1,14 @@
 package com.magelala.controller;
 
+import com.magelala.util.EmailUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,6 +36,9 @@ public class LoginController {
 
     @Autowired
     private SessionRegistry sessionRegistry;
+
+    @Autowired
+    private EmailUtil emailUtil;
 
     // 踢出用户
     @GetMapping("/kick")
@@ -146,12 +154,15 @@ public class LoginController {
         map.put("code",code);
         session.setAttribute("smsCode",map);
 
+        // 发送验证码到指定手机号
+        emailUtil.sendMail(code,mobile);
+
         logger.info("{}: 为{} 设置短信验证码：{}",session.getId(),mobile,code);
 
         response.sendRedirect("/login");
     }
 
-    // 短信登录生成验证码
+    // 邮箱登录生成验证码
     @RequestMapping("/email/code")
     @ResponseBody
     public void   email(String email, HttpSession session,HttpServletResponse response) throws IOException {
@@ -161,8 +172,19 @@ public class LoginController {
         map.put("code",code);
         session.setAttribute("emailCode",map);
 
+
+        // 发送验证码到指定邮箱
+       emailUtil.sendMail(code,email);
+
+
         logger.info("{}: 为{} 设置邮箱验证码：{}",session.getId(),email,code);
 
         response.sendRedirect("/login");
     }
+
+
+
+
+
+
 }
