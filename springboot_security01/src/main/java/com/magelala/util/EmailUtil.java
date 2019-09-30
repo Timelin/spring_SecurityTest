@@ -25,7 +25,7 @@ public class EmailUtil {
     private static Logger logger = LoggerFactory.getLogger(EmailUtil.class);
 
     // 发送者
-    @Value("${mail.fromMail.sender}")
+    @Value("${spring.mail.username}")
     private String sender;
 
     /* 接受者*/
